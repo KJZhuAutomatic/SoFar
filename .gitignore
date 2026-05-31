@@ -1,0 +1,11 @@
+.env
+.hypothesis/
+assets/
+checkpoints/
+datasets/
+output/
+scripts/SiliconCloud_test.py
+__pycache__/
+SoFar.egg-info/
+microsoft/
+segmentation/SAM/segment_anything.egg-info/

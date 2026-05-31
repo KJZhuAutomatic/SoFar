@@ -7,7 +7,15 @@ from PIL import Image
 from openai import OpenAI
 from serve.system_prompts import *
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"), base_url=os.getenv("OPENAI_BASE_URL"))
+# client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# gemini-2.0-flash-exp is comparable and even better than the deepseek-ai/deepseek-vl2
+client = OpenAI(
+    #302.AI后台-使用API-API Keys 生成的API KEY
+    api_key="sk-aR6jIxHcgxx2rmaPVbPJPCb3gKAid4LGXqbYqmkPWFUqo5qI",
+    #302.AI的base-url
+    base_url="https://3.5.996444.icu/v1"
+)
+# client = OpenAI(api_key="sk-lobpppcnvoalxpbonyhhegfbbdniafwqcazcgwdyufhlkgyy", base_url="https://api.siliconflow.cn/v1")
 
 def encode_image(image_path):
     with open(image_path, "rb") as image_file:
@@ -46,13 +54,13 @@ def long_horizon_planning(text, img):
     while True:
         try:
             completion = client.chat.completions.create(
-                model="gpt-4o",
+                model="deepseek-ai/deepseek-vl2", # "deepseek-ai/deepseek-vl2",
                 messages=messages,
                 max_tokens=1024,
                 timeout=30,
                 response_format={
-                    "type": "json_schema",
-                    "json_schema": {
+                    "type": "json_object",
+                    "json_object": {
                         "name": "steps",
                         "schema": {
                             "type": "array",
@@ -98,13 +106,13 @@ def object_parsing(text, img):
     while True:
         try:
             completion = client.chat.completions.create(
-                model="gpt-4o",
+                model="deepseek-ai/deepseek-vl2", # "deepseek-ai/deepseek-vl2",
                 messages=messages,
                 max_tokens=1024,
                 timeout=30,
                 response_format={
-                    "type": "json_schema",
-                    "json_schema": {
+                    "type": "json_object",
+                    "json_object": {
                         "name": "object_list",
                         "schema": {
                             "type": "object",
@@ -124,7 +132,7 @@ def object_parsing(text, img):
                 }
             )
             response = completion.choices[0].message.content
-            object_list = json.loads(response)['object_list']
+            object_list = json.loads(response)
             break
         except Exception as e:
             print("Retrying call ChatGPT", e)
@@ -156,13 +164,13 @@ def vqa_parsing(text, img):
     while True:
         try:
             completion = client.chat.completions.create(
-                model="gpt-4o",
+                model="deepseek-ai/deepseek-vl2",
                 messages=messages,
-                max_tokens=4096,
+                
                 timeout=30,
                 response_format={
-                    "type": "json_schema",
-                    "json_schema": {
+                    "type": "json_object",
+                    "json_object": {
                         "name": "vqa_info",
                         "schema": {
                             "type": "object",
@@ -199,7 +207,7 @@ def vqa_parsing(text, img):
             response = completion.choices[0].message.content
             response = json.loads(response)
             info = {}
-            for obj in response['info']:
+            for obj in response:
                 info[obj['object_name']] = obj['direction_attributes']
             break
         except Exception as e:
@@ -233,13 +241,13 @@ def manip_parsing(text, img):
     while True:
         try:
             completion = client.chat.completions.create(
-                model="gpt-4o",
+                model="deepseek-ai/deepseek-vl2",
                 messages=messages,
-                max_tokens=4096,
+                
                 timeout=30,
                 response_format={
-                    "type": "json_schema",
-                    "json_schema": {
+                    "type": "json_object",
+                    "json_object": {
                         "name": "manipulation_info",
                         "schema": {
                             "type": "object",
@@ -276,7 +284,7 @@ def manip_parsing(text, img):
             response = completion.choices[0].message.content
             response = json.loads(response)
             info = {}
-            for obj in response['info']:
+            for obj in response:
                 info[obj['object_name']] = obj['direction_attributes']
             break
         except Exception as e:
@@ -310,15 +318,14 @@ def open6dor_parsing(text, img):
     while True:
         try:
             completion = client.chat.completions.create(
-                model="gpt-4o",
+                model="deepseek-ai/deepseek-vl2",
                 messages=messages,
-                max_tokens=4096,
-                timeout=30,
+                timeout=60,
                 response_format={
-                    "type": "json_schema",
-                    "json_schema": {
+                    "type": "json_object",
+                    "json_object": {
                         "name": "pick_and_place_info",
-                        "schema": {
+                        "object": {
                             "type": "object",
                             "properties": {
                                 "picked_object": {"type": "string"},
@@ -401,13 +408,13 @@ def open6dor_spatial_reasoning(img, instruction, picked_object_info, other_objec
     while True:
         try:
             completion = client.chat.completions.create(
-                model="gpt-4o",
+                model="deepseek-ai/deepseek-vl2",
                 messages=messages,
-                max_tokens=4096,
+                
                 timeout=30,
                 response_format={
-                    "type": "json_schema",
-                    "json_schema": {
+                    "type": "json_object",
+                    "json_object": {
                         "name": "place_info",
                         "schema": {
                             "type": "object",
@@ -463,13 +470,13 @@ def manip_spatial_reasoning(img, instruction, scene_graph):
     while True:
         try:
             completion = client.chat.completions.create(
-                model="gpt-4o",
+                model="deepseek-ai/deepseek-vl2",
                 messages=messages,
-                max_tokens=4096,
+                
                 timeout=30,
                 response_format={
-                    "type": "json_schema",
-                    "json_schema": {
+                    "type": "json_object",
+                    "json_object": {
                         "name": "manipulation_info",
                         "schema": {
                             "type": "object",
@@ -558,9 +565,9 @@ def vqa_spatial_reasoning(img, instruction, scene_graph, eval=False):
     while True:
         try:
             completion = client.chat.completions.create(
-                model="gpt-4o",
+                model="deepseek-ai/deepseek-vl2",
                 messages=messages,
-                max_tokens=4096,
+                
                 timeout=30
             )
 

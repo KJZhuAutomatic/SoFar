@@ -8,7 +8,7 @@ from depth.utils import depth2pcd
 from serve import pointso as orientation
 from serve.scene_graph import get_scene_graph
 from segmentation import sam, florence as detection
-from serve.chatgpt import manip_parsing, manip_spatial_reasoning
+from serve.chatgpt_v2 import manip_parsing, manip_spatial_reasoning
 from serve.utils import generate_rotation_matrix, remove_outliers
 
 warnings.filterwarnings("ignore")

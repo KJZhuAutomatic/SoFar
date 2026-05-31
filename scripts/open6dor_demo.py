@@ -7,7 +7,7 @@ from PIL import Image
 from serve import pointso as orientation
 from segmentation import sam, florence as detection
 from serve.scene_graph import open6dor_scene_graph
-from serve.chatgpt import open6dor_parsing, open6dor_spatial_reasoning
+from serve.chatgpt_v2 import open6dor_parsing, open6dor_spatial_reasoning
 from serve.utils import generate_rotation_matrix, get_point_cloud_from_rgbd
 
 warnings.filterwarnings("ignore")

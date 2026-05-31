@@ -4,7 +4,7 @@ import numpy as np
 from PIL import Image
 from depth.utils import depth2pcd
 from serve import pointso as orientation
-from segmentation import sam, grounding_dino as detection
+from segmentation import sam, florence as detection
 
 
 warnings.filterwarnings("ignore")
@@ -21,8 +21,8 @@ def angle_between_vectors(v1, v2):
 
 
 if __name__ == "__main__":
-    image_path = "navigation.png"
-    depth_path = "navigation.npy"
+    image_path = "assets/navigation.png"
+    depth_path = "assets/navigation.npy"
     navigate_obj = ["microwave"]
     instruction = ["front view"]
     output_folder = "output"

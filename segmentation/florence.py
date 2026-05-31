@@ -1,4 +1,6 @@
 import os
+os.environ["HF_HUB_DISABLE_IMPLICIT_TOKEN"] = "1"
+
 import numpy as np
 from typing import Union, Any, Tuple, Dict
 from unittest.mock import patch
@@ -6,8 +8,11 @@ from unittest.mock import patch
 import torch
 from PIL import Image
 import supervision as sv
+import transformers
 from transformers import AutoModelForCausalLM, AutoProcessor
 from transformers.dynamic_module_utils import get_imports
+
+transformers.logging.set_verbosity_error()
 
 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -114,3 +119,44 @@ def get_detections(image, obj_list, florence_model, output_folder="output", sing
         print(f"After Selection: {len(detections.xyxy)} boxes")
 
     return detections
+
+
+if __name__ == '__main__':
+    from PIL import Image
+    print("Load models...")
+    model, processor = get_model()
+    image = Image.open("/opt/data/private/SoFar/assets/graspnet_img.png").convert("RGB")
+    output_folder = "/opt/data/private/SoFar/output"
+    task = "<OD>"
+    prompt = task
+    prompt = "Detect all objects in this image."
+    inputs = processor(text=prompt, images=image, return_tensors="pt").to(DEVICE)
+    generated_ids = model.generate(
+        input_ids=inputs["input_ids"],
+        pixel_values=inputs["pixel_values"],
+        max_new_tokens=1024,
+        num_beams=3
+    )
+    generated_text = processor.batch_decode(
+        generated_ids, skip_special_tokens=False)[0]
+    response = processor.post_process_generation(
+        generated_text, task=task, image_size=image.size)
+    detections = sv.Detections.from_lmm(
+            lmm=sv.LMM.FLORENCE_2,
+            result=response,
+            resolution_wh=image.size
+        )
+    detections.class_id = np.full(len(detections.xyxy), 0)
+    detections.confidence = np.full(len(detections.xyxy), 1.0)
+
+    image = np.array(image)
+    # annotate image with detections
+    box_annotator = sv.BoxAnnotator(
+        thickness=1
+    )
+    annotated_frame = box_annotator.annotate(scene=image.copy(), detections=detections)
+
+    # save the annotated florence image
+    annotated_frame = Image.fromarray(annotated_frame)
+    annotated_frame.save(os.path.join(output_folder, "florence_graspnet_img.jpg"))
+    print('--')
