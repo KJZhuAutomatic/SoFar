@@ -2,7 +2,7 @@
 The code requires `python>=3.8`, as well as `pytorch>=2.0.1` and `torchvision>=0.15.0`.
 Recommendation setting for the environment variable:
 ```bash
-conda create -n sofar python=3.10 -y
+conda create -n sofar python=3.12 -y
 conda activate sofar
 export CUDA_HOME=/path/to/cuda-12.1/
 pip install torch==2.3.1+cu121 torchvision==0.18.1+cu121 -f https://download.pytorch.org/whl/torch_stable.html
@@ -26,7 +26,10 @@ pip install --no-build-isolation -e segmentation/GroundingDINO
 # for yolo-world
 pip install inference[yolo-world]==0.9.13
 # for training SoFar-LLaVA
-pip install -e vlm
+pip install -e sofar_llava
+pip install flash-attn --no-build-isolation
+# for qwen inference
+pip install qwen-vl-utils[decord]==0.0.8
 pip install flash-attn --no-build-isolation
 ```
 
